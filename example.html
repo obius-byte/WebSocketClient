@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+    <head>
+		<script src="web-socket-client.js"></script>
+        <script>			
+			var wsClient = new WebSocketClient();
+
+			// instant connection
+			/*(async () => {
+				await wsClient.connect('ws://127.0.0.1:8006')
+				
+				wsClient.addEventListener('message', (e) => {
+					const message = JSON.parse(e.data)
+				
+					console.log('onmessage', message)
+				});
+			})();*/
+			
+			async function connect() {
+				await wsClient.connect('ws://127.0.0.1:8006', 5000)
+				
+				wsClient?.removeAllListener()
+				wsClient?.addEventListener('message', (e) => {
+					const message = JSON.parse(e.data)
+				
+					console.log('onmessage', message)
+				});
+				
+				console.log('isConnecting: ' + wsClient?.isConnecting())
+				console.log('isConnected: ' + wsClient?.isConnected())
+				console.log('isClosing: ' + wsClient?.isClosing())
+				console.log('isClosed: ' + wsClient?.isClosed())
+			}
+			
+			function send() {
+				wsClient?.send('selectFolder');
+			}
+			
+			function disconnect() {
+				wsClient?.disconnect();
+			}
+        </script>
+    </head>
+    <body>
+		<ul>
+			<li><a href="#" onclick="connect()">Connect</a></li>
+			<li><a href="#" onclick="send()">Send</a></li>
+			<li><a href="#" onclick="disconnect()">Disconnect</a></li>
+		</ul>
+    </body>
+</html>
