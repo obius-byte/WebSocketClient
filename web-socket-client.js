@@ -1,16 +1,22 @@
 class WebSocketClient {	
-	#connection = null
+	#_connection = null
 	
-	#events = []
-	
-	#states = {
+	#_events = []
+
+	#_states = {
 		CONNECTING: 0,
 		OPEN: 1,
 		CLOSING: 2,
 		CLOSED: 3
 	}
 	
-	#webSocketAsync(url) {
+	#_useJSON = false
+
+	useJSON(value) {
+		this.#_useJSON = value
+	}
+
+	#_webSocketAsync(url) {
 		return new Promise((resolve, reject) => {
 			const ws = new WebSocket(url);
 			ws.onopen = () => { resolve(ws) }
@@ -24,12 +30,12 @@ class WebSocketClient {
 		}
 		
 		try {
-			this.#connection = await this.#webSocketAsync(url)
+			this.#_connection = await this.#_webSocketAsync(url)
 			console.info('Websocket: %cConnected!', 'color: #28a745')
-			this.#events.forEach(event => {
-				this.#connection.addEventListener(event.type, event.callback)
+			this.#_events.forEach(event => {
+				this.#_connection.addEventListener(event.type, event.callback)
 			})
-			this.#connection.addEventListener('close', e => {
+			this.#_connection.addEventListener('close', e => {
 				console.info('Websocket: %cConnection terminated!', 'color: #dc3545')
 				if (!e.wasClean) {
 					console.info('Websocket: %cTrying to reconnect...', 'color: #ffc107')
@@ -43,38 +49,42 @@ class WebSocketClient {
 	}
 	
 	addEventListener(type, callback) {
-		this.#events.push({type, callback})
-		this.#connection?.addEventListener(type, callback)
+		this.#_events.push({type, callback})
+		this.#_connection?.addEventListener(type, callback)
 	}
 	
 	removeAllListener() {
-		this.#events.forEach(event => {
-			this.#connection?.removeEventListener(event.type, event.callback)
+		this.#_events.forEach(event => {
+			this.#_connection?.removeEventListener(event.type, event.callback)
 		})
-		this.#events = []
+		this.#_events = []
 	}
 	
-	send(name, data = null) {
-		this.#connection?.send(JSON.stringify({name, data}))
+	send(data) {
+		if (this.#_useJSON) {
+			data = JSON.stringify(data)
+		}
+		this.#_connection?.send(data)
 	}
 	
 	disconnect() {
-		this.#connection?.close()
+		this.#_connection?.close()
+		this.#_connection = null
 	}
 	
 	isConnecting() {
-		return this.#connection?.readyState === this.#states.CONNECTING
+		return this.#_connection?.readyState === this.#_states.CONNECTING
 	}
 	
 	isConnected() {
-		return this.#connection?.readyState === this.#states.OPEN
+		return this.#_connection?.readyState === this.#_states.OPEN
 	}
 	
 	isClosing() {
-		return this.#connection?.readyState === this.#states.CLOSING
+		return this.#_connection?.readyState === this.#_states.CLOSING
 	}
 	
 	isClosed() {
-		return this.#connection?.readyState === this.#states.CLOSED
+		return this.#_connection?.readyState === this.#_states.CLOSED
 	}
 }
