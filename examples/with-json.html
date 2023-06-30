@@ -1,42 +1,43 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
     <head>
-		<script src="web-socket-client.js"></script>
+        <title>WebSocket Client</title>
+		<script src="ws-client.min.js"></script>
         <script>			
-			var wsClient = new WebSocketClient();
-			wsClient.useJSON(true)
+			const ws = new WebSocketClient();
+			ws.useJSON(true)
 			
 			// instant connection
 			/*(async () => {
-				await wsClient.connect('ws://127.0.0.1:8006')				
-				wsClient.addEventListener('message', (e) => {
+				await ws.connect('ws://127.0.0.1:8006')
+				ws.addEventListener('message', (e) => {
 					const message = JSON.parse(e.data)			
 					console.log('onmessage', message)
 				});
 			})();*/
 			
 			async function connect() {
-				await wsClient.connect('ws://127.0.0.1:8006', 5000)				
-				wsClient.removeAllListener()
-				wsClient.addEventListener('message', (e) => {
+				await ws.connect('ws://127.0.0.1:8006', 5000)
+				ws.removeAllListener()
+				ws.addEventListener('message', (e) => {
 					const message = JSON.parse(e.data)			
 					console.log('onmessage', message)
 				});
 			}
 			
 			function state() {
-				console.log('isConnecting: ' + wsClient.isConnecting())
-				console.log('isConnected: ' + wsClient.isConnected())
-				console.log('isClosing: ' + wsClient.isClosing())
-				console.log('isClosed: ' + wsClient.isClosed())
+				console.log('isConnecting: ' + ws.isConnecting())
+				console.log('isConnected: ' + ws.isConnected())
+				console.log('isClosing: ' + ws.isClosing())
+				console.log('isClosed: ' + ws.isClosed())
 			}
 			
 			function send() {
-				wsClient.send({ name: 'selectFolder' });
+				ws.send({ name: 'selectFolder' });
 			}
 			
 			function disconnect() {
-				wsClient.disconnect();
+				ws.disconnect();
 			}
         </script>
     </head>
