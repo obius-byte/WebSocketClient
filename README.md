@@ -73,3 +73,7 @@ function send() {
 
 ...
 ```
+
+## License
+
+[MIT](LICENSE)
