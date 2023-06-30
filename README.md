@@ -3,9 +3,9 @@
 
 ## Installing
 
-### Local
+### CDN
 ```html
-<script src="/ws-client.min.js"></script>
+<script src="https://cdn.statically.io/gh/obius-byte/ws-client/master/latest/ws-client.min.js"></script>
 ```
 
 ## Example
