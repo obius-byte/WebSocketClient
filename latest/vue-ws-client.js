@@ -30,9 +30,9 @@ export default class WebSocketClient {
             this._connection = await this._webSocketAsync(url)
             console.info('Websocket: %cConnected!', 'color: #28a745')
             this._events.forEach(event => {
-                this._connection.addEventListener(event.type, event.callback)
+                this._connection?.addEventListener(event.type, event.callback)
             })
-            this._connection.addEventListener('close', e => {
+            this._connection?.addEventListener('close', e => {
                 console.info('Websocket: %cConnection terminated!', 'color: #dc3545')
                 if (!e.wasClean) {
                     console.info('Websocket: %cTrying to reconnect...', 'color: #ffc107')
@@ -45,9 +45,14 @@ export default class WebSocketClient {
         }
     }
 
-    addEventListener(type, callback) {
+    addListener(type, callback) {
         this._events.push({type, callback})
         this._connection?.addEventListener(type, callback)
+    }
+
+    removeListener(type, callback) {
+        this._events = this._events.filter(e => e.callback !== callback)
+        this._connection?.removeEventListener(type, callback)
     }
 
     removeAllListener() {

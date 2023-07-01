@@ -4,26 +4,39 @@
         <title>WebSocket Client</title>
 		<script src="ws-client.min.js"></script>
         <script>			
-			const ws = new WebSocketClient();
+			const ws = new WebSocketClient()
 			ws.useJSON(true)
 			
 			// instant connection
 			/*(async () => {
-				await ws.connect('ws://127.0.0.1:8006')
-				ws.addEventListener('message', (e) => {
+				await ws.connect('ws://127.0.0.1:8006', 5000)
+				ws.addListener('message', (e) => {
 					const message = JSON.parse(e.data)			
 					console.log('onmessage', message)
-				});
+				})
 			})();*/
 			
 			async function connect() {
 				await ws.connect('ws://127.0.0.1:8006', 5000)
-				ws.removeAllListener()
-				ws.addEventListener('message', (e) => {
+				ws.addListener('message', (e) => {
 					const message = JSON.parse(e.data)			
-					console.log('onmessage', message)
-				});
+					console.log('onmessage[lambda]', message)
+				})
 			}
+
+            function onMessage(e) {
+                const message = JSON.parse(e.data)
+
+                console.log('onmessage[function]', message)
+            }
+
+            function addListener() {
+                ws.addListener('message', onMessage)
+            }
+
+            function removeListener() {
+                ws.removeListener('message', onMessage)
+            }
 			
 			function state() {
 				console.log('isConnecting: ' + ws.isConnecting())
@@ -33,17 +46,20 @@
 			}
 			
 			function send() {
-				ws.send({ name: 'selectFolder' });
+				ws.send({ name: 'selectFolder' })
 			}
 			
 			function disconnect() {
-				ws.disconnect();
+			    ws.removeAllListener()
+                ws.disconnect()
 			}
         </script>
     </head>
     <body>
 		<ul>
 			<li><a href="#" onclick="connect()">Connect</a></li>
+            <li><a href="#" onclick="addListener()">addListener</a></li>
+            <li><a href="#" onclick="removeListener()">removeListener</a></li>
 			<li><a href="#" onclick="send()">Send</a></li>
 			<li><a href="#" onclick="disconnect()">Disconnect</a></li>
 		</ul>

@@ -18,7 +18,7 @@ ws.useJSON(true);
 // Instant connection
 /*(async () => {
 	await ws.connect('ws://127.0.0.1:8006', 5000)
-	ws.addEventListener('message', (e) => {
+	ws.addListener('message', (e) => {
 		const message = JSON.parse(e.data)
 		console.log('onmessage', message)
 	});
@@ -26,10 +26,9 @@ ws.useJSON(true);
 
 async function connect() {
 	await ws.connect('ws://127.0.0.1:8006', 5000)	
-	ws.removeAllListener()
-	ws.addEventListener('message', (e) => {
+	ws.addListener('message', (e) => {
 		const message = JSON.parse(e.data)
-		console.log('onmessage', message)
+		console.log('onmessage[lambda]', message)
 	});
 }
 
@@ -40,11 +39,25 @@ function state() {
 	console.info('isClosed: ' + ws.isClosed())
 }
 
+function onMessage(e) {
+    const message = JSON.parse(e.data)
+    console.log('onmessage[function]', message)
+}
+
+function addListener() {
+    ws.addListener('message', onMessage)
+}
+
+function removeListener() {
+    ws.removeListener('message', onMessage)
+}
+
 function send() {
 	ws.send({ name: 'selectFolder' });
 }
 
 function disconnect() {
+    ws.removeAllListener()
 	ws.disconnect();
 }
 ```
@@ -56,8 +69,7 @@ ws.useJSON(false);
 
 async function connect() {
 	await ws.connect('ws://127.0.0.1:8006', 5000)	
-	ws.removeAllListener()
-	ws.addEventListener('message', (e) => {
+	ws.addListener('message', (e) => {
 		const message = e.data
 		console.log('onmessage', message)
 	});
@@ -79,6 +91,7 @@ export default {
     mounted() {
         (async () => {
             await this.connect()
+            this.addListener() 
         })();
     },
     unmounted() {
@@ -86,12 +99,20 @@ export default {
     },
     methods: {
         async connect() {
-            await ws.connect('ws://127.0.0.1:8006', 5000)
+            await ws.connect('ws://127.0.0.1:8006', 5000)  
+        },
+        addListener() {
+            ws.addListener('message', this.onMessage)
+        },
+        removeListener() {
+            ws.removeListener('message', this.onMessage)
+        },   
+        removeAllListener() {
             ws.removeAllListener()
-            ws.addEventListener('message', (e) => {
-                const message = JSON.parse(e.data)
-                console.log('onmessage', message)
-            })
+        },       
+        onMessage(e) {
+            const message = JSON.parse(e.data)
+            console.log('onmessage', message)
         },
         send() {
             ws.send({ name: 'selectFolder' })
