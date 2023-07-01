@@ -66,7 +66,41 @@ async function connect() {
 function send() {
 	ws.send('selectFolder')
 }
+```
 
+### Vue
+```js
+import WebSocketClient from './libs/vue-ws-client.js'
+
+const ws = new WebSocketClient();
+ws.useJSON(true)
+
+export default {
+    mounted() {
+        (async () => {
+            await this.connect()
+        })();
+    },
+    unmounted() {
+        this.disconnect()
+    },
+    methods: {
+        async connect() {
+            await ws.connect('ws://127.0.0.1:8006', 5000)
+            ws.removeAllListener()
+            ws.addEventListener('message', (e) => {
+                const message = JSON.parse(e.data)
+                console.log('onmessage', message)
+            })
+        },
+        send() {
+            ws.send({ name: 'selectFolder' })
+        },
+        disconnect() {
+            ws.disconnect()
+        }
+    }
+}
 ```
 
 ## License

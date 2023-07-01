@@ -1,4 +1,4 @@
-class WebSocketClient {
+export default class WebSocketClient {
     _connection = null
 
     _events = []
