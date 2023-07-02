@@ -7,8 +7,11 @@ export default class WebSocketClient {
 
     _options = {}
 
-    constructor(options = { useJSON: false, timeouts: [ 5000 ], connectionAttemptLimit: 1 }) {
-        this._options = options
+    constructor(options = {}) {
+        this._options = {
+            useJSON: options.useJSON ?? false,
+            timeouts: options.timeouts ?? [ 5000 ]
+        }
     }
 
     _webSocketAsync(url) {
@@ -40,14 +43,14 @@ export default class WebSocketClient {
             })
         } catch (e) {
             console.info('ws-client: %cFailed to connect!', 'color: red')
-            const timeout = this._options.timeouts[this._connectionAttempts] ?? 5000
-            this._connectionAttempts++
-            const connectionAttemptLimit = this._options.connectionAttemptLimit ?? 5
-            if (this._connectionAttempts === connectionAttemptLimit) {
+            const connectionAttemptLimit = this._options.timeouts?.length ?? 1
+            if (this._connectionAttempts >= connectionAttemptLimit) {
                 console.info('ws-client: %cConnection attempts limit reached!', 'color: orange')
                 this._connectionAttempts = 0
                 return
             }
+
+            const timeout = this._options.timeouts[this._connectionAttempts++] ?? 5000
 
             console.info(`ws-client: %cNext connection attempt in ${timeout / 1000} sec.`, 'color: orange')
             setTimeout(async () => {

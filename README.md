@@ -20,8 +20,7 @@ const ws = new WebSocketClient({
         10000,
         30000,
         60000
-    ],
-    connectionAttemptLimit: 5
+    ]
 });
 
 // Instant connection
@@ -81,8 +80,7 @@ const ws = new WebSocketClient({
         10000,
         30000,
         60000
-    ],
-    connectionAttemptLimit: 5
+    ]
 });
 
 async function connect() {
@@ -110,8 +108,7 @@ const ws = new WebSocketClient({
         10000,
         30000,
         60000
-    ],
-    connectionAttemptLimit: 5
+    ]
 });
 
 export default {
