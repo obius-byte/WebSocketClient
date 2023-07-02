@@ -1,16 +1,14 @@
 export default class WebSocketClient {
-    _connection = null
+    _ws = null
 
     _events = []
 
-    _useJSON = false
+    _connectionAttempts = 0
 
-    constructor() {
-        //
-    }
+    _options = {}
 
-    useJSON(value) {
-        this._useJSON = value
+    constructor(options = { useJSON: false, timeouts: [ 5000 ], connectionAttemptLimit: 1 }) {
+        this._options = options
     }
 
     _webSocketAsync(url) {
@@ -21,72 +19,85 @@ export default class WebSocketClient {
         });
     }
 
-    async connect(url, timeout = 3000) {
+    async connect(url) {
         if (this.isConnecting() || this.isConnected()) {
             return
         }
 
         try {
-            this._connection = await this._webSocketAsync(url)
-            console.info('Websocket: %cConnected!', 'color: #28a745')
+            this._ws = await this._webSocketAsync(url)
+            this._connectionAttempts = 0
+            console.info('ws-client: %cConnected!', 'color: green')
             this._events.forEach(event => {
-                this._connection?.addEventListener(event.type, event.callback)
+                this._ws?.addEventListener(event.type, event.callback)
             })
-            this._connection?.addEventListener('close', e => {
-                console.info('Websocket: %cConnection terminated!', 'color: #dc3545')
+            this._ws?.addEventListener('close', e => {
+                console.info('ws-client: %cConnection terminated!', 'color: red')
                 if (!e.wasClean) {
-                    console.info('Websocket: %cTrying to reconnect...', 'color: #ffc107')
-                    setTimeout(async () => await this.connect(url), timeout)
+                    console.info(`ws-client: %cTrying to reconnect...`, 'color: orange')
+                    this.connect(url)
                 }
             })
         } catch (e) {
-            console.info('Websocket: %cTrying to connect...', 'color: #ffc107')
-            setTimeout(async () => await this.connect(url), timeout)
+            console.info('ws-client: %cFailed to connect!', 'color: red')
+            const timeout = this._options.timeouts[this._connectionAttempts] ?? 5000
+            this._connectionAttempts++
+            const connectionAttemptLimit = this._options.connectionAttemptLimit ?? 5
+            if (this._connectionAttempts === connectionAttemptLimit) {
+                console.info('ws-client: %cConnection attempts limit reached!', 'color: orange')
+                this._connectionAttempts = 0
+                return
+            }
+
+            console.info(`ws-client: %cNext connection attempt in ${timeout / 1000} sec.`, 'color: orange')
+            setTimeout(async () => {
+                await this.connect(url)
+            }, timeout)
         }
     }
 
     addListener(type, callback) {
         this._events.push({type, callback})
-        this._connection?.addEventListener(type, callback)
+        this._ws?.addEventListener(type, callback)
     }
 
     removeListener(type, callback) {
         this._events = this._events.filter(e => e.callback !== callback)
-        this._connection?.removeEventListener(type, callback)
+        this._ws?.removeEventListener(type, callback)
     }
 
     removeAllListener() {
         this._events.forEach(event => {
-            this._connection?.removeEventListener(event.type, event.callback)
+            this._ws?.removeEventListener(event.type, event.callback)
         })
         this._events = []
     }
 
     send(data) {
-        if (this._useJSON) {
+        if (this._options.useJSON) {
             data = JSON.stringify(data)
         }
-        this._connection?.send(data)
+        this._ws?.send(data)
     }
 
     disconnect() {
-        this._connection?.close()
-        this._connection = null
+        this._ws?.close()
+        this._ws = null
     }
 
     isConnecting() {
-        return this._connection?.readyState === WebSocket.CONNECTING
+        return this._ws?.readyState === WebSocket.CONNECTING
     }
 
     isConnected() {
-        return this._connection?.readyState === WebSocket.OPEN
+        return this._ws?.readyState === WebSocket.OPEN
     }
 
     isClosing() {
-        return this._connection?.readyState === WebSocket.CLOSING
+        return this._ws?.readyState === WebSocket.CLOSING
     }
 
     isClosed() {
-        return this._connection?.readyState === WebSocket.CLOSED
+        return this._ws?.readyState === WebSocket.CLOSED
     }
 }

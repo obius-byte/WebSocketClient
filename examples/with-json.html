@@ -3,13 +3,22 @@
     <head>
         <title>WebSocket Client</title>
 		<script src="ws-client.min.js"></script>
-        <script>			
-			const ws = new WebSocketClient()
-			ws.useJSON(true)
+        <script>
+            const ws = new WebSocketClient({
+                useJSON: true,
+                timeouts: [
+                    1000,
+                    5000,
+                    10000,
+                    30000,
+                    60000
+                ],
+                connectionAttemptLimit: 5
+            });
 			
 			// instant connection
 			/*(async () => {
-				await ws.connect('ws://127.0.0.1:8006', 5000)
+				await ws.connect('ws://127.0.0.1:8006')
 				ws.addListener('message', (e) => {
 					const message = JSON.parse(e.data)			
 					console.log('onmessage', message)
@@ -17,7 +26,7 @@
 			})();*/
 			
 			async function connect() {
-				await ws.connect('ws://127.0.0.1:8006', 5000)
+				await ws.connect('ws://127.0.0.1:8006')
 				ws.addListener('message', (e) => {
 					const message = JSON.parse(e.data)			
 					console.log('onmessage[lambda]', message)

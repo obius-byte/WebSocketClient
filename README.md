@@ -12,12 +12,21 @@
 
 ### Sending and receiving data in JSON format
 ```js
-const ws = new WebSocketClient();
-ws.useJSON(true);
+const ws = new WebSocketClient({
+    useJSON: true,
+    timeouts: [
+        1000,
+        5000,
+        10000,
+        30000,
+        60000
+    ],
+    connectionAttemptLimit: 5
+});
 
 // Instant connection
 /*(async () => {
-	await ws.connect('ws://127.0.0.1:8006', 5000)
+	await ws.connect('ws://127.0.0.1:8006')
 	ws.addListener('message', (e) => {
 		const message = JSON.parse(e.data)
 		console.log('onmessage', message)
@@ -25,7 +34,7 @@ ws.useJSON(true);
 })();*/
 
 async function connect() {
-	await ws.connect('ws://127.0.0.1:8006', 5000)	
+	await ws.connect('ws://127.0.0.1:8006')	
 	ws.addListener('message', (e) => {
 		const message = JSON.parse(e.data)
 		console.log('onmessage[lambda]', message)
@@ -64,11 +73,20 @@ function disconnect() {
 
 ### Without JSON format
 ```js
-const ws = new WebSocketClient();
-ws.useJSON(false);
+const ws = new WebSocketClient({
+    useJSON: false,
+    timeouts: [
+        1000,
+        5000,
+        10000,
+        30000,
+        60000
+    ],
+    connectionAttemptLimit: 5
+});
 
 async function connect() {
-	await ws.connect('ws://127.0.0.1:8006', 5000)	
+	await ws.connect('ws://127.0.0.1:8006')	
 	ws.addListener('message', (e) => {
 		const message = e.data
 		console.log('onmessage', message)
@@ -84,8 +102,17 @@ function send() {
 ```js
 import WebSocketClient from './libs/vue-ws-client.js'
 
-const ws = new WebSocketClient();
-ws.useJSON(true)
+const ws = new WebSocketClient({
+    useJSON: true,
+    timeouts: [
+        1000,
+        5000,
+        10000,
+        30000,
+        60000
+    ],
+    connectionAttemptLimit: 5
+});
 
 export default {
     mounted() {
@@ -99,7 +126,7 @@ export default {
     },
     methods: {
         async connect() {
-            await ws.connect('ws://127.0.0.1:8006', 5000)  
+            await ws.connect('ws://127.0.0.1:8006')  
         },
         addListener() {
             ws.addListener('message', this.onMessage)
